@@ -1,0 +1,14 @@
+DOCUMENTATION
+=============
+
+1. Download the source code from https://github.com/dosindi/yocojack
+2. Proceed to yocojack directory
+3. Execute mvn spring-boot:run
+4. Access http://localhost:8888/yocojack-portal/
+5. Click Parse TestCase
+6. View Results on the Grid
+
+
+
+
+
