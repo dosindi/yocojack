@@ -5,29 +5,30 @@ YOCOJACK SIMULATION  DOCUMENTATION
 2. Proceed to yocojack directory
 3. Execute mvn spring-boot:run
 4. Access http://localhost:8888/yocojack-portal/
-5. Click Parse TestCase
+5. Click Parse TestCase button
 6. View Results on the Grid
 
+============
+REQUIREMENTS
+============
+
+- Java JDK 1.8 setup
+- Maven home variable must be setup
+- (Optional) Prefered IDE e.g Netbeans
+- 
 
 
-
-
-
-
-Template for a simple Vaadin application that only requires a Servlet 3.0 container to run.
-
-
-Workflow
-========
+Technical Workflow
+==================
 
 To compile the entire project, run "mvn install".
 
-To run the application, run "mvn jetty:run" and open http://localhost:8080/ .
+To run the application, run "mvn spring-boot:run" and open http://localhost:8888/yocojack-portal/
 
 To produce a deployable production mode WAR:
 - change productionMode to true in the servlet class configuration (nested in the UI class)
 - run "mvn clean package"
-- test the war file with "mvn jetty:run-war"
+- test the war file with "mvn spring-boot:run-war"
 
 Client-Side compilation
 -------------------------
