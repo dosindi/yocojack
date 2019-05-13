@@ -2,6 +2,7 @@ package com.nyakundid;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.appreciated.material.MaterialTheme;
 import com.nyakundid.model.ScoreTable;
 import javax.servlet.annotation.WebServlet;
 
@@ -11,6 +12,7 @@ import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
+import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -104,9 +106,40 @@ public class MyUI extends UI {
         });
 
         scoreGrid.addColumn(ScoreTable::getGame).setCaption("Game");
-        scoreGrid.addColumn(ScoreTable::getPlayerA).setCaption("Player A");
-        scoreGrid.addColumn(ScoreTable::getPlayerB).setCaption("Player B");
-        scoreGrid.addColumn((scoreTable) -> scoreTable.isPlayerAWins()).setCaption("Winner");
+        scoreGrid.addComponentColumn((scoreTable) -> {
+
+            Label lbl1 = new Label();
+            lbl1.addStyleName(MaterialTheme.BUTTON_ROUND+" "+MaterialTheme.LABEL_SUCCESS);
+            lbl1.setWidth(400, Unit.PIXELS);
+            lbl1.setContentMode(ContentMode.HTML);
+            //Call Rule 1
+            lbl1.setValue(scoreTable.getPlayerA() + "<br/>(Over 21)");
+            return lbl1;
+        }).setCaption("Player A");
+
+        scoreGrid.addComponentColumn((scoreTable) -> {
+            Label lbl = new Label();
+            lbl.addStyleName(MaterialTheme.BUTTON_ROUND+" "+MaterialTheme.LABEL_SUCCESS);
+            lbl.setWidth(400, Unit.PIXELS);
+            lbl.setContentMode(ContentMode.HTML);
+            
+            //Call Rule 2
+            lbl.setValue(scoreTable.getPlayerB() + "<br/>(Score)");
+            return lbl;
+        }).setCaption("Player B");
+
+        scoreGrid.addComponentColumn((scoreTable) -> {
+
+            Label lbl = new Label();
+            lbl.setContentMode(ContentMode.HTML);
+            if (scoreTable.isPlayerAWins()) {
+                lbl.setValue("Player A <br/>(Higher value hand)");
+            } else if (!scoreTable.isPlayerAWins()) {
+                lbl.setValue("Player B <br/>(Player A  over 21)");
+            }
+            return lbl;
+        }).setCaption("Winner");
+
         scoreGrid.setSizeFull();
 
         layout.addComponents(labels, data, button, scoreGrid);
@@ -121,9 +154,8 @@ public class MyUI extends UI {
 
         List<ScoreTable> sd = Arrays.asList(
                 new ScoreTable(1, "5H 5D 7C 9S", "2S 4H 8D", true),
-                new ScoreTable(2, "5H 5D 7C 9S", "2S 4H 8D", true),
-                new ScoreTable(3, "5H 5D 7C 9S", "2S 4H 8D", true),
-                new ScoreTable(4, "5H 5D 7C 9S", "2S 4H 8D", true));
+                new ScoreTable(2, "AH JC ", "10H 6C", false),
+                new ScoreTable(3, "AH JC", "6H 5C 10D", true));
 
         return sd;
     }
