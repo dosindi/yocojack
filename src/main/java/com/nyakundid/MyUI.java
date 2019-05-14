@@ -3,6 +3,7 @@ package com.nyakundid;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.appreciated.material.MaterialTheme;
+import com.nyakundid.controller.Rule1;
 import com.nyakundid.model.ScoreTable;
 import javax.servlet.annotation.WebServlet;
 
@@ -113,7 +114,9 @@ public class MyUI extends UI {
             lbl1.setWidth(400, Unit.PIXELS);
             lbl1.setContentMode(ContentMode.HTML);
             //Call Rule 1
-            lbl1.setValue(scoreTable.getPlayerA() + "<br/>(Over 21)");
+            Rule1 rule1 = new Rule1(scoreTable.getPlayerA());
+            String result = rule1.results();
+            lbl1.setValue(scoreTable.getPlayerA() + "<br/>"+result);
             return lbl1;
         }).setCaption("Player A");
 
@@ -122,9 +125,11 @@ public class MyUI extends UI {
             lbl.addStyleName(MaterialTheme.BUTTON_ROUND+" "+MaterialTheme.LABEL_SUCCESS);
             lbl.setWidth(400, Unit.PIXELS);
             lbl.setContentMode(ContentMode.HTML);
-            
+            //Rule 1
+            Rule1 rule1 = new Rule1(scoreTable.getPlayerB());
+            String result = rule1.results();
             //Call Rule 2
-            lbl.setValue(scoreTable.getPlayerB() + "<br/>(Score)");
+            lbl.setValue(scoreTable.getPlayerB() + "<br/>"+result);
             return lbl;
         }).setCaption("Player B");
 
