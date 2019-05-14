@@ -31,8 +31,9 @@ public class Rule1 {
         int score = 0;
         List<String> list = Arrays.asList(new String[]{"2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "K", "Q", "A"});
         for (String x : rack) {
-            log.log(Level.INFO, "=={0}", x);
+            
             for (String y : list) {
+                
                 log.log(Level.INFO, "=={0} == {1}=={2}", new Object[]{x, y, score});
                 if (x.contains(y)) {
                     switch (y) {
