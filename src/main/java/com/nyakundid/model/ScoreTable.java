@@ -5,13 +5,13 @@
  */
 package com.nyakundid.model;
 
+import com.nyakundid.controller.Rule1;
 import lombok.Getter;
 import lombok.Setter;
 
 /**
  *
- * @author nyakundid
- * Bean for displaying score
+ * @author nyakundid Bean for displaying score
  */
 public class ScoreTable {
 
@@ -36,4 +36,11 @@ public class ScoreTable {
         this.playerAWins = playerAWins;
     }
 
+    //TODO add rules here
+    public String winnerMsg() {
+        String r2score = "";
+
+        return r2score;
+    }
+ 
 }

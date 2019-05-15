@@ -26,15 +26,22 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import okhttp3.Call;
+import okhttp3.Credentials;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.Route;
 import org.springframework.beans.factory.annotation.Value;
 
 /**
@@ -51,10 +58,12 @@ import org.springframework.beans.factory.annotation.Value;
 @SpringUI(path = "/")
 public class MyUI extends UI {
 
+    private Logger log = Logger.getLogger(MyUI.class.getName());
+
     @Value("${konstant.base_url}")
     public String BASE_URL;
 
-    private Logger log = Logger.getLogger(MyUI.class.getName());
+    public String PROXY_USR, PROXY_PWD, PROXY_HOST, PROXY_PORT;
 
     public Grid<ScoreTable> scoreGrid = new Grid<>();
     public Button button = new Button("Parse TestCases", VaadinIcons.DOWNLOAD);
@@ -102,7 +111,7 @@ public class MyUI extends UI {
 
 //            scoreData = requestURL();
             layout.addComponent(new Label("url: " + BASE_URL));
-            scoreData = populateScoreData();
+            scoreData = requestURL();//populateScoreData();
             scoreGrid.setItems(scoreData);
         });
 
@@ -110,41 +119,42 @@ public class MyUI extends UI {
         scoreGrid.addComponentColumn((scoreTable) -> {
 
             Label lbl1 = new Label();
-            lbl1.addStyleName(MaterialTheme.BUTTON_ROUND+" "+MaterialTheme.LABEL_SUCCESS);
+            lbl1.addStyleName(MaterialTheme.BUTTON_ROUND + " " + MaterialTheme.LABEL_SUCCESS);
             lbl1.setWidth(400, Unit.PIXELS);
             lbl1.setContentMode(ContentMode.HTML);
             //Call Rule 1
             Rule1 rule1 = new Rule1(scoreTable.getPlayerA());
-            String result = rule1.results();
-            lbl1.setValue(scoreTable.getPlayerA() + "<br/>"+result);
+            String result = rule1.resultLabel(rule1.results());
+            lbl1.setValue(scoreTable.getPlayerA() + "<br/>" + result);
             return lbl1;
         }).setCaption("Player A");
 
         scoreGrid.addComponentColumn((scoreTable) -> {
             Label lbl = new Label();
-            lbl.addStyleName(MaterialTheme.BUTTON_ROUND+" "+MaterialTheme.LABEL_SUCCESS);
+            lbl.addStyleName(MaterialTheme.BUTTON_ROUND + " " + MaterialTheme.LABEL_SUCCESS);
             lbl.setWidth(400, Unit.PIXELS);
             lbl.setContentMode(ContentMode.HTML);
             //Rule 1
             Rule1 rule1 = new Rule1(scoreTable.getPlayerB());
-            String result = rule1.results();
+            String result = rule1.resultLabel(rule1.results());
             //Call Rule 2
-            lbl.setValue(scoreTable.getPlayerB() + "<br/>"+result);
+            lbl.setValue(scoreTable.getPlayerB() + "<br/>" + result);
             return lbl;
         }).setCaption("Player B");
 
         scoreGrid.addComponentColumn((scoreTable) -> {
 
             Label lbl = new Label();
-            lbl.setContentMode(ContentMode.HTML);
+            lbl.setContentMode(ContentMode.HTML);            
             if (scoreTable.isPlayerAWins()) {
-                lbl.setValue("Player A <br/>(Higher value hand)");
+                lbl.setValue(VaadinIcons.TROPHY.getHtml()+ " Player A <br/>(Higher value hand)");
             } else if (!scoreTable.isPlayerAWins()) {
-                lbl.setValue("Player B <br/>(Player A  over 21)");
+                lbl.setValue(VaadinIcons.TROPHY.getHtml()+ " Player B <br/>(Player A  over 21)");
             }
             return lbl;
         }).setCaption("Winner");
 
+        scoreGrid.setItems(populateScoreData());
         scoreGrid.setSizeFull();
 
         layout.addComponents(labels, data, button, scoreGrid);
@@ -194,22 +204,33 @@ public class MyUI extends UI {
                     + "		]"
                     + "	}"
                     + "]";
-            try {
-                Request request = new Request.Builder()
-                        .url(BASE_URL)
-                        .build();
-                client = new OkHttpClient();
-                Call call = client.newCall(request);
-                Response response = call.execute();
 
-                if (response.code() == 200) {
-                    Notification.show("Successfully retrieved testcase", Notification.Type.TRAY_NOTIFICATION);
-                } else {
-                    Notification.show("Error occured on retriving data", Notification.Type.ERROR_MESSAGE);
-                }
+//                Request request = new Request.Builder()
+//                        .url(BASE_URL)
+//                        .build();
+//                client = new OkHttpClient();
+//                Call call = client.newCall(request);
+//                Response response = call.execute();
+            loadConfig();
+            OkHttpClient client = new OkHttpClient.Builder().connectTimeout(30, TimeUnit.MINUTES)
+                    .writeTimeout(30, TimeUnit.MINUTES).readTimeout(30, TimeUnit.MINUTES)
+                    .proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(PROXY_HOST, Integer.parseInt(PROXY_PORT))))
+                    .authenticator((Route route, Response rspns) -> {
+                        String credential = Credentials.basic(PROXY_USR, PROXY_PWD);
+                        return rspns.request().newBuilder().header("Proxy-Authorization", credential).build();
+                    }).build();
 
-            } catch (IOException ex) {
-                log.info(ex.toString());
+            Response response = null;
+
+            Request request = new Request.Builder().url(BASE_URL).get().build();
+            response = client.newCall(request).execute();
+            log.info("Res::" + response.body().string());
+            if (response.code() == 200) {
+                layout.addComponent(new Label("response: " + response.body()));
+                Notification.show("Successfully retrieved testcase", Notification.Type.TRAY_NOTIFICATION);
+            } else {
+                Notification.show("Error occured on retriving data", Notification.Type.ERROR_MESSAGE);
+                layout.addComponent(new Label("response:error:: " + response.body()));
             }
 
             ObjectMapper objectMapper = new ObjectMapper();
@@ -217,10 +238,17 @@ public class MyUI extends UI {
             score = objectMapper.readValue(result, new TypeReference<List<ScoreTable>>() {
             });
         } catch (IOException ex) {
-            Logger.getLogger(MyUI.class.getName()).log(Level.SEVERE, null, ex);
+            log.info(ex.toString());
         }
 
         return score;
+    }
+
+    public void loadConfig() {
+        PROXY_HOST = "10.1.0.1";
+        PROXY_PORT = "8383";
+        PROXY_USR = System.getProperty("proxy.authentication.username");
+        PROXY_PWD = System.getProperty("proxy.authentication.password");
     }
 
     @WebServlet(urlPatterns = "/*", name = "MyUIServlet", asyncSupported = true)

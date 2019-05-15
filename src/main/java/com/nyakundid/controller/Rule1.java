@@ -15,7 +15,6 @@ import java.util.logging.Logger;
  */
 public class Rule1 {
 
-    private String res = "";
     private String deck = "";
 
     private Logger log = Logger.getLogger(Rule1.class.getName());
@@ -25,16 +24,16 @@ public class Rule1 {
 
     }
 
-    public String results() {
+    public int results() {
 
         String[] rack = deck.split(" ");
         int score = 0;
         List<String> list = Arrays.asList(new String[]{"2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "K", "Q", "A"});
         for (String x : rack) {
-            
+
             for (String y : list) {
-                
-                log.log(Level.INFO, "=={0} == {1}=={2}", new Object[]{x, y, score});
+
+//                log.log(Level.INFO, "=={0} == {1}=={2}", new Object[]{x, y, score});
                 if (x.contains(y)) {
                     switch (y) {
 
@@ -80,12 +79,21 @@ public class Rule1 {
 
         }
 
-        if (score > 21) {
+        return score;
+    }
+
+    public String resultLabel(int s) {
+        
+        String res = "";
+        
+        if (s > 21) {
             res = "(Over 21)";
         } else {
-            res = "(Score " + score + ")";
+            res = "(Score " + s + ")";
         }
+
         return res;
+
     }
 
 }
