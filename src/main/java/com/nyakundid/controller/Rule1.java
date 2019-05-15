@@ -86,7 +86,7 @@ public class Rule1 {
         
         String res = "";
         
-        if (s > 21) {
+        if (s > 22) {
             res = "(Over 21)";
         } else {
             res = "(Score " + s + ")";

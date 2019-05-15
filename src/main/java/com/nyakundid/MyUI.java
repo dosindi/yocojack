@@ -145,11 +145,12 @@ public class MyUI extends UI {
         scoreGrid.addComponentColumn((scoreTable) -> {
 
             Label lbl = new Label();
-            lbl.setContentMode(ContentMode.HTML);            
+            lbl.setContentMode(ContentMode.HTML);         
+            
             if (scoreTable.isPlayerAWins()) {
-                lbl.setValue(VaadinIcons.TROPHY.getHtml()+ " Player A <br/>(Higher value hand)");
+                lbl.setValue(VaadinIcons.TROPHY.getHtml()+ " Player A <br/>"+scoreTable.winnerMsg());
             } else if (!scoreTable.isPlayerAWins()) {
-                lbl.setValue(VaadinIcons.TROPHY.getHtml()+ " Player B <br/>(Player A  over 21)");
+                lbl.setValue(VaadinIcons.TROPHY.getHtml()+ " Player B <br/>"+scoreTable.winnerMsg());
             }
             return lbl;
         }).setCaption("Winner");
