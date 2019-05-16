@@ -118,7 +118,10 @@ public class MyUI extends UI {
         scoreGrid.addComponentColumn((scoreTable) -> {
 
             Label lbl1 = new Label();
-            lbl1.addStyleName(MaterialTheme.BUTTON_ROUND + " " + MaterialTheme.LABEL_SUCCESS);
+
+            if (scoreTable.isPlayerAWins()) {
+                lbl1.addStyleName(MaterialTheme.BUTTON_ROUND + " " + MaterialTheme.LABEL_SUCCESS);
+            }
             lbl1.setWidth(400, Unit.PIXELS);
             lbl1.setContentMode(ContentMode.HTML);
             //Call Rule 1
@@ -130,13 +133,16 @@ public class MyUI extends UI {
 
         scoreGrid.addComponentColumn((scoreTable) -> {
             Label lbl = new Label();
-            lbl.addStyleName(MaterialTheme.BUTTON_ROUND + " " + MaterialTheme.LABEL_SUCCESS);
+
+            if (!scoreTable.isPlayerAWins()) {
+                lbl.addStyleName(MaterialTheme.BUTTON_ROUND + " " + MaterialTheme.LABEL_SUCCESS);
+            }
+
             lbl.setWidth(400, Unit.PIXELS);
             lbl.setContentMode(ContentMode.HTML);
             //Rule 1
             Rule1 rule1 = new Rule1(scoreTable.getPlayerB());
             String result = rule1.resultLabel(rule1.results());
-            //Call Rule 2
             lbl.setValue(scoreTable.getPlayerB() + "<br/>" + result);
             return lbl;
         }).setCaption("Player B");
@@ -215,7 +221,7 @@ public class MyUI extends UI {
             for (int x = 0; x < jsonArray.length(); x++) {
                 JSONObject objects = (JSONObject) jsonArray.get(x);
                 ScoreTable s = new ScoreTable();
-                int id = x+1;
+                int id = x + 1;
                 s.setGame(id);
                 s.setPlayerA(sanitize(objects.getJSONArray("playerA").toString()));
                 s.setPlayerB(sanitize(objects.getJSONArray("playerB").toString()));
