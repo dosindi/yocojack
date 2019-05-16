@@ -36,6 +36,9 @@ public class ScoreTable {
         this.playerAWins = playerAWins;
     }
 
+    public ScoreTable() {
+    }
+
     //TODO add rules here
     public String winnerMsg() {
         String r2score = "";
@@ -61,10 +64,9 @@ public class ScoreTable {
             } else {
                 r2score = "(High card B ";
             }
-            
+
             //TODO  logic for draws 
             // r2score = "beats 10)";
-            
         }
 
         return r2score;

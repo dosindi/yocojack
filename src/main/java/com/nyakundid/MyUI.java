@@ -25,6 +25,7 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
+import elemental.json.JsonArray;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -42,6 +43,8 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.Route;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 
 /**
@@ -145,12 +148,12 @@ public class MyUI extends UI {
         scoreGrid.addComponentColumn((scoreTable) -> {
 
             Label lbl = new Label();
-            lbl.setContentMode(ContentMode.HTML);         
-            
+            lbl.setContentMode(ContentMode.HTML);
+
             if (scoreTable.isPlayerAWins()) {
-                lbl.setValue(VaadinIcons.TROPHY.getHtml()+ " Player A <br/>"+scoreTable.winnerMsg());
+                lbl.setValue(VaadinIcons.TROPHY.getHtml() + " Player A <br/>" + scoreTable.winnerMsg());
             } else if (!scoreTable.isPlayerAWins()) {
-                lbl.setValue(VaadinIcons.TROPHY.getHtml()+ " Player B <br/>"+scoreTable.winnerMsg());
+                lbl.setValue(VaadinIcons.TROPHY.getHtml() + " Player B <br/>" + scoreTable.winnerMsg());
             }
             return lbl;
         }).setCaption("Winner");
@@ -225,7 +228,8 @@ public class MyUI extends UI {
 
             Request request = new Request.Builder().url(BASE_URL).get().build();
             response = client.newCall(request).execute();
-            log.info("Res::" + response.body().string());
+            String payload = response.body().string();
+            log.log(Level.INFO, "Res::{0}", payload);
             if (response.code() == 200) {
                 layout.addComponent(new Label("response: " + response.body()));
                 Notification.show("Successfully retrieved testcase", Notification.Type.TRAY_NOTIFICATION);
@@ -234,10 +238,21 @@ public class MyUI extends UI {
                 layout.addComponent(new Label("response:error:: " + response.body()));
             }
 
-            ObjectMapper objectMapper = new ObjectMapper();
+            JSONArray jsonArray = new JSONArray(payload);
+            log.log(Level.INFO, "{0} size::", jsonArray.length());
 
-            score = objectMapper.readValue(result, new TypeReference<List<ScoreTable>>() {
-            });
+            for (int x = 0; x < jsonArray.length(); x++) {
+                JSONObject objects =(JSONObject) jsonArray.get(x);            
+                ScoreTable s = new ScoreTable();
+                s.setGame(x);
+                s.setPlayerA(objects.getJSONArray("playerA").toString().replace("[", "").replace("]", ""));
+                s.setPlayerB(objects.getJSONArray("playerB").toString().replace("[", "").replace("]", ""));
+                s.setPlayerAWins(objects.getBoolean("playerAWins"));
+                score.add(s);
+            }
+//            ObjectMapper objectMapper = new ObjectMapper();
+//            score = objectMapper.readValue(result, new TypeReference<List<ScoreTable>>() {
+//            });
         } catch (IOException ex) {
             log.info(ex.toString());
         }
