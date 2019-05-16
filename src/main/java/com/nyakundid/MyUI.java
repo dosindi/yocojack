@@ -105,10 +105,8 @@ public class MyUI extends UI {
         labels.addComponent(name);
 
         button.addClickListener(e -> {
-            //TODO parseTestCase from url
-//            String urlData = requestURL();
+            //parseTestCase from url
 
-//            scoreData = requestURL();
             layout.addComponent(new Label("url: " + BASE_URL));
             scoreData = requestURL();//populateScoreData();
             scoreGrid.setItems(scoreData);
@@ -162,9 +160,11 @@ public class MyUI extends UI {
 
         scoreGrid.setItems(populateScoreData());
         scoreGrid.setSizeFull();
-
-        layout.addComponents(labels, data, button, scoreGrid);
-        layout.setComponentAlignment(labels, Alignment.TOP_CENTER);
+        VerticalLayout header = new VerticalLayout(labels, data, button);
+        layout.addComponents(header, scoreGrid);
+        layout.setExpandRatio(scoreGrid, 2);
+        layout.setExpandRatio(header, 2);
+        header.setComponentAlignment(labels, Alignment.TOP_CENTER);
     }
 
     private void initializeData() {
@@ -175,25 +175,22 @@ public class MyUI extends UI {
 
         List<ScoreTable> sd = Arrays.asList(
                 new ScoreTable(1, "5H 5D 7C 9S", "2S 4H 8D", true),
-                new ScoreTable(2, "AH JC ", "10H 6C", false),
-                new ScoreTable(3, "AH JC", "6H 5C 10D", true));
+                new ScoreTable(2, "AH JC", "10H 6C", false),
+                new ScoreTable(3, "AH JC", "6H 5C 10D", true),
+                 new ScoreTable(4, "AH JC", "AH JD", true));
 
         return sd;
     }
 
     private List<ScoreTable> requestURL() {
+
         List<ScoreTable> score = new ArrayList<>();
+
         try {
 
-//                Request request = new Request.Builder()
-//                        .url(BASE_URL)
-//                        .build();
-//                client = new OkHttpClient();
-//                Call call = client.newCall(request);
-//                Response response = call.execute();
 //Run behind a Proxy 
             loadConfig();
-            OkHttpClient client = new OkHttpClient.Builder().connectTimeout(30, TimeUnit.MINUTES)
+            client = new OkHttpClient.Builder().connectTimeout(30, TimeUnit.MINUTES)
                     .writeTimeout(30, TimeUnit.MINUTES).readTimeout(30, TimeUnit.MINUTES)
                     .proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(PROXY_HOST, Integer.parseInt(PROXY_PORT))))
                     .authenticator((Route route, Response rspns) -> {
@@ -208,11 +205,9 @@ public class MyUI extends UI {
             String payload = response.body().string();
             log.log(Level.INFO, "Res::{0}", payload);
             if (response.code() == 200) {
-//                layout.addComponent(new Label("response: " + response.body()));
                 Notification.show("Successfully retrieved testcase", Notification.Type.TRAY_NOTIFICATION);
             } else {
                 Notification.show("Error occured on retriving data", Notification.Type.ERROR_MESSAGE);
-//                layout.addComponent(new Label("response:error:: " + response.body()));
             }
 
             JSONArray jsonArray = new JSONArray(payload);

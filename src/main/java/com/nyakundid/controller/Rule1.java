@@ -32,7 +32,6 @@ public class Rule1 {
         for (String x : rack) {
 
             for (String y : list) {
-
 //                log.log(Level.INFO, "=={0} == {1}=={2}", new Object[]{x, y, score});
                 if (x.contains(y)) {
                     switch (y) {
@@ -70,9 +69,12 @@ public class Rule1 {
                         case "K":
                             score = score + 10;
                             break;
-                        default:
+                        case "Q":
+                            score = score + 10;
+                            break;
+                        case "A":
                             score = score + 11;
-
+                            break;
                     }
                 }
             }
@@ -83,9 +85,9 @@ public class Rule1 {
     }
 
     public String resultLabel(int s) {
-        
+
         String res = "";
-        
+
         if (s > 21) {
             res = "(Over 21)";
         } else {
