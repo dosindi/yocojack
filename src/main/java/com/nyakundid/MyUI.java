@@ -25,7 +25,6 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
-import elemental.json.JsonArray;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -35,12 +34,9 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import okhttp3.Call;
 import okhttp3.Credentials;
-import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.Route;
 import org.json.JSONArray;
@@ -182,32 +178,6 @@ public class MyUI extends UI {
     private List<ScoreTable> requestURL() {
         List<ScoreTable> score = new ArrayList<>();
         try {
-            String result = "["
-                    + "	{"
-                    + "		\"playerA\": ["
-                    + "			\"8D\","
-                    + "			\"JS\""
-                    + "		],"
-                    + "		\"playerAWins\": false,"
-                    + "		\"playerB\": ["
-                    + "			\"5D\","
-                    + "			\"QS\","
-                    + "			\"3H\""
-                    + "		]"
-                    + "	},"
-                    + "	{"
-                    + "		\"playerA\": ["
-                    + "			\"10D\","
-                    + "			\"JH\""
-                    + "		],"
-                    + "		\"playerAWins\": true,"
-                    + "		\"playerB\": ["
-                    + "			\"QS\","
-                    + "			\"4C\","
-                    + "			\"JC\""
-                    + "		]"
-                    + "	}"
-                    + "]";
 
 //                Request request = new Request.Builder()
 //                        .url(BASE_URL)
@@ -215,6 +185,7 @@ public class MyUI extends UI {
 //                client = new OkHttpClient();
 //                Call call = client.newCall(request);
 //                Response response = call.execute();
+//Run behind a Proxy 
             loadConfig();
             OkHttpClient client = new OkHttpClient.Builder().connectTimeout(30, TimeUnit.MINUTES)
                     .writeTimeout(30, TimeUnit.MINUTES).readTimeout(30, TimeUnit.MINUTES)
@@ -231,22 +202,23 @@ public class MyUI extends UI {
             String payload = response.body().string();
             log.log(Level.INFO, "Res::{0}", payload);
             if (response.code() == 200) {
-                layout.addComponent(new Label("response: " + response.body()));
+//                layout.addComponent(new Label("response: " + response.body()));
                 Notification.show("Successfully retrieved testcase", Notification.Type.TRAY_NOTIFICATION);
             } else {
                 Notification.show("Error occured on retriving data", Notification.Type.ERROR_MESSAGE);
-                layout.addComponent(new Label("response:error:: " + response.body()));
+//                layout.addComponent(new Label("response:error:: " + response.body()));
             }
 
             JSONArray jsonArray = new JSONArray(payload);
             log.log(Level.INFO, "{0} size::", jsonArray.length());
 
             for (int x = 0; x < jsonArray.length(); x++) {
-                JSONObject objects =(JSONObject) jsonArray.get(x);            
+                JSONObject objects = (JSONObject) jsonArray.get(x);
                 ScoreTable s = new ScoreTable();
-                s.setGame(x);
-                s.setPlayerA(objects.getJSONArray("playerA").toString().replace("[", "").replace("]", ""));
-                s.setPlayerB(objects.getJSONArray("playerB").toString().replace("[", "").replace("]", ""));
+                int id = x+1;
+                s.setGame(id);
+                s.setPlayerA(sanitize(objects.getJSONArray("playerA").toString()));
+                s.setPlayerB(sanitize(objects.getJSONArray("playerB").toString()));
                 s.setPlayerAWins(objects.getBoolean("playerAWins"));
                 score.add(s);
             }
@@ -265,6 +237,12 @@ public class MyUI extends UI {
         PROXY_PORT = "8383";
         PROXY_USR = System.getProperty("proxy.authentication.username");
         PROXY_PWD = System.getProperty("proxy.authentication.password");
+    }
+
+    public String sanitize(String s) {
+        String sanitized = s.replace("[", "").replace("]", "").replace("\",\"", " ").replace("\"", "");
+        return sanitized;
+
     }
 
     @WebServlet(urlPatterns = "/*", name = "MyUIServlet", asyncSupported = true)
