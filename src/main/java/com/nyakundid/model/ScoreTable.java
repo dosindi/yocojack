@@ -7,7 +7,9 @@ package com.nyakundid.model;
 
 import com.nyakundid.controller.Rule1;
 import com.nyakundid.controller.Rule2;
+import com.nyakundid.controller.Rule3;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import lombok.Getter;
@@ -49,8 +51,8 @@ public class ScoreTable {
     public String winnerMsg() {
         String r2score = "";
         String r2append = "";
-        Rule1 rule = new Rule1(playerA);
-        Rule1 rule1 = new Rule1(playerB);
+        Rule1 rule = new Rule1(getPlayerA());
+        Rule1 rule1 = new Rule1(getPlayerB());
 
         if (rule.results() < 22 && rule1.results() < 22 && rule.results() != rule1.results()) {
             r2score = "(Higher value  hand)";
@@ -72,29 +74,57 @@ public class ScoreTable {
             }
 
             //TODO  logic for draws 
-            // r2score = "beats 10)";
             //sort deck in descending and compare deck A and B
             Rule2 rule2 = new Rule2();
-            int[] deckA = rule2.scoreDesc(playerA);
-            int[] deckB = rule2.scoreDesc(playerB);
-            Arrays.sort(deckA,0,deckA.length - 1);
-            Arrays.sort(deckB,0,deckB.length - 1);
-            log.info("#"+game+": "+deckA[deckA.length - 1] + " || " + deckB[deckB.length - 1]);
-            if (deckA[deckA.length - 1] > deckB[deckB.length - 1]) {
-                r2append = " beats " + deckA[deckA.length - 1] + ")";
-            } else if (deckB[deckB.length - 1] > deckA[deckA.length - 1]) {
-                r2append = " beats " + deckA[deckA.length - 1] + ")";
+            int[] deckA = rule2.scoreRank(getPlayerA());
+            int[] deckB = rule2.scoreRank(getPlayerB());
+            int scoreA = findMax(deckA);
+            int scoreB = findMax(deckB);
+            if (scoreA > scoreB) {
+                r2append = " beats " + scoreB + ")";
+            } else if (scoreB > scoreA) {
+                r2append = " beats " + scoreA + ")";
             }
 
-            log.log(Level.INFO, "{0}==={1}", new Object[]{deckA, deckB});
-            // ranked according to suit, in the following order: S, H, C, D; spades beats hearts, hearts beats clubs, clubs beats diamonds. 
+            //TODO rank according to suit, in the following order: S, H, C, D; spades beats hearts, hearts beats clubs, clubs beats diamonds. 
             if (Arrays.equals(deckA, deckB)) {
-                log.log(Level.INFO, "**EQUAL" + game);
+                log.log(Level.INFO, "**EQUAL {0}", game);
+                
+                boolean winner = false;
+                String[] list = new String[]{"S", "H", "C", " D"};
+                for(int x=0;x<list.length&&!winner;x++ ){
+                   boolean a = getPlayerA().contains(list[x]);
+                   boolean b = getPlayerB().contains(list[x]);
+                 log.log(Level.INFO, "**EQUAL {0} || {1} || {2} || {3} || {4} || {5}", new Object[]{game,a,b,getPlayerA(),getPlayerB(),list[x]});  
+                   if(a&&a!=b){
+                       winner = true;   
+                       r2append = " beats " +  list[x] + ")";
+                   }
+                    if(b&&b!=a){
+                       winner = true;
+                       r2append = " beats " + list[x] + ")";
+                   }
+                   
+                }
+           
+ 
+
             }
 
         }
 
         return r2score + r2append;
+    }
+
+    public int findMax(int[] deck) {
+
+        int max = 0;
+        for (int x : deck) {
+            if (x > max) {
+                max = x;
+            }
+        }
+        return max;
     }
 
 }

@@ -177,7 +177,7 @@ public class MyUI extends UI {
                 new ScoreTable(1, "5H 5D 7C 9S", "2S 4H 8D", true),
                 new ScoreTable(2, "AH JC", "10H 6C", false),
                 new ScoreTable(3, "AH JC", "6H 5C 10D", true),
-                 new ScoreTable(4, "AH JC", "AH JD", true));
+                new ScoreTable(4, "10D 6C", "10S 6H", false));
 
         return sd;
     }

@@ -7,6 +7,7 @@ package com.nyakundid.controller;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  *
@@ -17,10 +18,11 @@ import java.util.List;
  */
 public class Rule2 {
 
+    private Logger log = Logger.getLogger(Rule2.class.getName());
     public Rule2() {
     }
 
-    public int[] scoreDesc(String deck) {
+    public int[] scoreRank(String deck) {
 
         String[] rack = deck.split(" ");
         int[] desc = new int[rack.length];
@@ -29,7 +31,7 @@ public class Rule2 {
         for (String x : rack) {
             for (String y : list) {
                 if (x.contains(y)) {
-                    switch (x) {
+                    switch (y) {
                         case "2":
                             desc[i] = 2;
                             break;
@@ -70,11 +72,12 @@ public class Rule2 {
                             desc[i] = 11;
                             break;
                     }
+                    System.out.println("size"+desc.length+"|"+i+" | "+desc[i]);
                     i++;
                 }
             }
         }
-
+        
         return desc;
     }
 }
