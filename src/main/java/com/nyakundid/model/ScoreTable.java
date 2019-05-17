@@ -7,9 +7,7 @@ package com.nyakundid.model;
 
 import com.nyakundid.controller.Rule1;
 import com.nyakundid.controller.Rule2;
-import com.nyakundid.controller.Rule3;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import lombok.Getter;
